@@ -2,5 +2,11 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - init: 'echo "TODO: Replace with init/build command"'
-    command: 'echo "TODO: Replace with command to start project"'
+  - init: ./.init-workspace.sh
+
+  # Ref: https://github.com/gitpod-io/gitpod/issues/1997
+  - name: pre-commit workaround
+    command: echo "export PIP_USER=false" >> ~/.bashrc && . ~/.bashrc
+
+  - name: emojify terminal
+    command: cat emoji.bashrc >> ~/.bashrc && . ~/.bashrc
