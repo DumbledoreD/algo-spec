@@ -1,4 +1,4 @@
-# Uses python3
+# python3
 
 
 def gcd(a, b):
