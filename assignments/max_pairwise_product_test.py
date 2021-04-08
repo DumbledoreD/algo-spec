@@ -28,7 +28,7 @@ def test_basic(numbers):
 
 @pytest.mark.parametrize(
     "numbers",
-    [random.sample(range(10_000), random.randint(1, 1_000)) for i in range(1000)],
+    [random.sample(range(1_000), random.randint(1, 1_00)) for i in range(1000)],
 )
 def test_stress(numbers):
     assert fast(numbers) == slow(numbers)
