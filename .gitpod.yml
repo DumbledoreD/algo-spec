@@ -9,4 +9,4 @@ tasks:
     command: echo "export PIP_USER=false" >> ~/.bashrc && . ~/.bashrc
 
   - name: emojify terminal
-    command: cat emoji.bashrc >> ~/.bashrc && . ~/.bashrc
+    command: cat .emoji.bashrc >> ~/.bashrc && . ~/.bashrc
