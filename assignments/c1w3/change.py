@@ -1,6 +1,3 @@
-# python3
-
-
 def get_change(m):
     coins = [10, 5, 1]
     num_coins = 0

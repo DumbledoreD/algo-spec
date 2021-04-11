@@ -1,6 +1,3 @@
-# python3
-
-
 def get_fibonacci_huge(n, m):
     pisano_period = get_pisano_period(m)
 

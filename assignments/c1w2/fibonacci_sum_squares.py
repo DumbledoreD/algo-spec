@@ -1,6 +1,3 @@
-# python3
-
-
 def fibonacci_sum_squares(n):
     pisano_period = get_pisano_period(10)
 
