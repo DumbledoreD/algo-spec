@@ -34,3 +34,5 @@ alias ga="git add -A"
 alias gu="git add -u"
 alias gc="git commit -m"
 alias gp="git push"
+
+alias pc="pre-commit run"
