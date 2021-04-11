@@ -1,10 +1,11 @@
-# python3
+def fibonacci_sum_squares(n):
+    pisano_period = get_pisano_period(10)
 
+    length = pisano_period[(n + 1) % len(pisano_period)]
+    width = pisano_period[n % len(pisano_period)]
 
-def get_fibonacci_huge(n, m):
-    pisano_period = get_pisano_period(m)
-
-    return pisano_period[n % len(pisano_period)]
+    # Key S(n) = F(n + 1) * F(n)
+    return (length * width) % 10
 
 
 def get_pisano_period(m):
@@ -36,5 +37,5 @@ def calc_fib(n):
 
 
 if __name__ == "__main__":
-    n, m = map(int, input().split())
-    print(get_fibonacci_huge(n, m))
+    n = int(input())
+    print(fibonacci_sum_squares(n))

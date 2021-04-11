@@ -1,6 +1,3 @@
-# python3
-
-
 def get_fibonacci_last_digit(n):
     if n <= 1:
         return n

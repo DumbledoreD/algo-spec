@@ -1,11 +1,11 @@
-# python3
-
-
-def fibonacci_sum(n):
+def fibonacci_partial_sum(m, n):
     pisano_period = get_pisano_period(10)
 
-    # Key: S(n) = F(n + 2) - 1
-    return (pisano_period[(n + 2) % len(pisano_period)] - 1) % 10
+    # Key: F(m) + ... + F(n) = S(n) - S(m - 1) & S(n) = F(n + 2) - 1
+    n_last_digit = pisano_period[(n + 2) % len(pisano_period)]
+    m_last_digit = pisano_period[(m + 1) % len(pisano_period)]
+
+    return (n_last_digit + 10 - m_last_digit) % 10
 
 
 def get_pisano_period(m):
@@ -37,5 +37,5 @@ def calc_fib(n):
 
 
 if __name__ == "__main__":
-    n = int(input())
-    print(fibonacci_sum(n))
+    m, n = map(int, input().split())
+    print(fibonacci_partial_sum(m, n))

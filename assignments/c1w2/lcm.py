@@ -1,6 +1,3 @@
-# python3
-
-
 def lcm(a, b):
     return int(a * b / gcd(a, b))
 

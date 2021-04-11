@@ -8,5 +8,5 @@ tasks:
   - name: pre-commit workaround
     command: echo "export PIP_USER=false" >> ~/.bashrc && . ~/.bashrc
 
-  - name: emojify terminal
-    command: cat .emoji.bashrc >> ~/.bashrc && . ~/.bashrc
+  - name: personalize terminal
+    command: cat .personal.bashrc >> ~/.bashrc && . ~/.bashrc
