@@ -24,7 +24,7 @@ def test_partision(a, expected_a, expected_m1, expected_m2):
 
 
 @pytest.mark.parametrize(
-    "a", [[random.choice(range(10)) for i in range(10 ** 3)] for i in range(1000)]
+    "a", [[random.randrange(10) for i in range(10 ** 3)] for i in range(1000)]
 )
 def test_stress(a):
     assert randomized_quick_sort(a.copy(), 0, len(a) - 1) == sorted(a)

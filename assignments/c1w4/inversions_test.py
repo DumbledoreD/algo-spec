@@ -6,7 +6,7 @@ from .inversions import get_number_of_inversions, merge_sort
 
 
 @pytest.mark.parametrize(
-    "a", [[random.choice(range(10)) for i in range(10 ** 3)] for i in range(1000)]
+    "a", [[random.randrange(10) for i in range(10 ** 3)] for i in range(1000)]
 )
 def test_stress(a):
     assert merge_sort(a.copy()) == sorted(a)

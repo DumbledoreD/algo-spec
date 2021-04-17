@@ -15,7 +15,7 @@ def slow(starts, ends, points):
 
 
 def gen_segments(starts):
-    ends = [s + random.choice(range(10)) for s in starts]
+    ends = [s + random.randrange(10) for s in starts]
     return starts, ends
 
 
@@ -23,8 +23,8 @@ def gen_segments(starts):
     "starts, ends, points",
     [
         (
-            *gen_segments([random.choice(range(10)) for i in range(50)]),
-            [random.choice(range(20)) for i in range(20)],
+            *gen_segments([random.randrange(10) for i in range(50)]),
+            [random.randrange(20) for i in range(20)],
         )
         for i in range(100)
     ],

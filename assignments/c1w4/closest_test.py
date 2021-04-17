@@ -11,8 +11,8 @@ from .closest import minimum_distance as fast
     "xs, ys",
     [
         (
-            [random.choice(range(100)) for x in range(25)],
-            [random.choice(range(100)) for y in range(25)],
+            [random.randrange(100) for x in range(25)],
+            [random.randrange(100) for y in range(25)],
         )
         for case in range(1000)
     ],
