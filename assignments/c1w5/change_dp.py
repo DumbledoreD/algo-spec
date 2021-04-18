@@ -5,14 +5,14 @@ coins = [1, 3, 4]
 
 
 @functools.lru_cache(maxsize=None)
-def recuresive(m):
+def recursive(m):
     if m == 0:
         return 0
 
     min_change = float("inf")
     for c in coins:
         if c <= m:
-            min_change = min(recuresive(m - c) + 1, min_change)
+            min_change = min(recursive(m - c) + 1, min_change)
 
     return min_change
 
