@@ -36,3 +36,5 @@ alias gc="git commit -m"
 alias gp="git push"
 
 alias pc="pre-commit run"
+
+alias pt="pytest -xs"
