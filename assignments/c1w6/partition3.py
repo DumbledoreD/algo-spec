@@ -6,7 +6,7 @@ import sys
 def recursive(a):
     @functools.lru_cache(maxsize=None)
     def dp(i, v_1, v_2, v_3):
-        # Found the partiotion
+        # Found the partition
         if v_1 == v_2 == v_3 == 0:
             return True
 
