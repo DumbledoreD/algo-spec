@@ -5,7 +5,6 @@ AssignedJob = namedtuple("AssignedJob", ("worker", "started_at"))
 
 
 def assign_jobs(n_workers, jobs):
-    # TODO: replace this code with a faster algorithm.
     end_times_heap = []
     result = []
 
