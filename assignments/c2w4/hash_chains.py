@@ -19,12 +19,12 @@ class QueryProcessor:
         self.lists = [deque() for _ in range(self.bucket_count)]
 
     def _hash_func(self, s):
-        hash = 0
+        h = 0
 
         for i in range(len(s) - 1, -1, -1):
-            hash = (hash * self._multiplier + ord(s[i])) % self._prime
+            h = (h * self._multiplier + ord(s[i])) % self._prime
 
-        return hash % self.bucket_count
+        return h % self.bucket_count
 
     def _get_chain(self, s):
         return self.lists[self._hash_func(s)]
