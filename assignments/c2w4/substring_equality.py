@@ -2,7 +2,7 @@ import sys
 
 
 class Solver:
-    def __init__(self, s, x=31, p1=10 ** 9 + 7, p2=10 ** 9 + 9):
+    def __init__(self, s, x=31, p1=int(1e9 + 7), p2=int(1e9 + 9)):  # 1e9 is float
         self.s, self.x, self.p1, self.p2 = s, x, p1, p2
         self.prefix_hashes = self._get_prefix_hashes(self.s, self.x, self.p1, self.p2)
 
@@ -31,11 +31,13 @@ class Solver:
         if start == 0:
             return p1_hashes[end], p2_hashes[end]
 
-        y = self.x ** length
+        # Faster than using y = self.x ** length
+        y1 = pow(self.x, length, self.p1)
+        y2 = pow(self.x, length, self.p2)
 
         return (
-            (p1_hashes[end] - y * p1_hashes[start - 1]) % self.p1,
-            (p2_hashes[end] - y * p2_hashes[start - 1]) % self.p2,
+            (p1_hashes[end] - y1 * p1_hashes[start - 1]) % self.p1,
+            (p2_hashes[end] - y2 * p2_hashes[start - 1]) % self.p2,
         )
 
 
