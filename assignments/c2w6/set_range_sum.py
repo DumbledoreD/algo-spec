@@ -1,8 +1,4 @@
-# python3
-
 from sys import stdin
-
-# Splay tree implementation
 
 
 # Vertex of a splay tree
@@ -15,6 +11,9 @@ class Vertex:
             right,
             parent,
         )
+
+
+# Splay tree implementation
 
 
 def update(v):
