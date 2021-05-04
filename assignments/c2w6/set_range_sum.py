@@ -3,192 +3,247 @@ from sys import stdin
 
 # Vertex of a splay tree
 class Vertex:
-    def __init__(self, key, sum, left, right, parent):
-        (self.key, self.sum, self.left, self.right, self.parent) = (
-            key,
-            sum,
-            left,
-            right,
-            parent,
-        )
+    def __init__(self, key, left, right, parent, subtree_sum):
+        self.key, self.left, self.right, self.parent = key, left, right, parent
+        self.sum = subtree_sum
 
 
 # Splay tree implementation
 
 
-def update(v):
-    if v is None:
-        return
-    v.sum = (
-        v.key
-        + (v.left.sum if v.left is not None else 0)
-        + (v.right.sum if v.right is not None else 0)
-    )
-    if v.left is not None:
-        v.left.parent = v
-    if v.right is not None:
-        v.right.parent = v
-
-
-def smallRotation(v):
-    parent = v.parent
-    if parent is None:
-        return
-    grandparent = v.parent.parent
-    if parent.left == v:
-        m = v.right
-        v.right = parent
-        parent.left = m
-    else:
-        m = v.left
-        v.left = parent
-        parent.right = m
-    update(parent)
-    update(v)
-    v.parent = grandparent
-    if grandparent is not None:
-        if grandparent.left == parent:
-            grandparent.left = v
+# Makes splay of the given vertex till it the new root.
+def splay(n):
+    while n and n.parent:
+        if n.parent.parent:
+            bigRotation(n)
         else:
-            grandparent.right = v
+            smallRotation(n)
+
+    return n
 
 
-def bigRotation(v):
-    if v.parent.left == v and v.parent.parent.left == v.parent:
-        # Zig-zig
-        smallRotation(v.parent)
-        smallRotation(v)
-    elif v.parent.right == v and v.parent.parent.right == v.parent:
-        # Zig-zig
-        smallRotation(v.parent)
-        smallRotation(v)
-    else:
-        # Zig-zag
-        smallRotation(v)
-        smallRotation(v)
+def smallRotation(n):
+    p = n.parent
+    q = p and p.parent
 
+    if p is None:
+        return
 
-# Makes splay of the given vertex and makes
-# it the new root.
-def splay(v):
-    if v is None:
-        return None
-    while v.parent is not None:
-        if v.parent.parent is None:
-            smallRotation(v)
-            break
-        bigRotation(v)
-    return v
+    if p.left == n:  # n is the left child
+        #   p        n
+        #  /          \
+        # n    --->    p
+        #  \          /
+        #   nr       nr
+        nr = n.right
+        n.right = p
+        p.left = nr
 
+    else:  # n is the right child
+        # p              n
+        #  \            /
+        #   n   --->   p
+        #  /            \
+        # nl             nl
+        nl = n.left
+        n.left = p
+        p.right = nl
 
-# Searches for the given key in the tree with the given root
-# and calls splay for the deepest visited node after that.
-# Returns pair of the result and the new root.
-# If found, result is a pointer to the node with the given key.
-# Otherwise, result is a pointer to the node with the smallest
-# bigger key (next value in the order).
-# If the key is bigger than all keys in the tree,
-# then result is None.
-def find(root, key):
-    v = root
-    last = root
-    next = None
-    while v is not None:
-        if v.key >= key and (next is None or v.key < next.key):
-            next = v
-        last = v
-        if v.key == key:
-            break
-        if v.key < key:
-            v = v.right
+    # Update p <---> n
+    p.parent = n
+
+    # Update n <---> q
+    n.parent = q
+    if q:
+        if q.left == p:
+            q.left = n
         else:
-            v = v.left
-    root = splay(last)
-    return (next, root)
+            q.right = n
+
+    update_sum(p)
+    update_sum(n)
 
 
-def split(root, key):
-    (result, root) = find(root, key)
-    if result is None:
+def update_sum(n):
+    if n:
+        n.sum = n.key + (n.left.sum if n.left else 0) + (n.right.sum if n.right else 0)
+
+
+def bigRotation(n):
+    if (n.parent.left == n and n.parent.parent.left == n.parent) or (
+        n.parent.right == n and n.parent.parent.right == n.parent
+    ):
+        # Left zig-zig
+        #     q             p            n
+        #    /           /     \          \
+        #   p           n       q          p
+        #  / \           \     /          / \
+        # n   pr          nr  pr         nr  q
+        #  \                                /
+        #   nr                             pr
+        # Right zig-zig
+        # q                 p                  n
+        #  \             /     \              /
+        #   p           q       n            p
+        #  / \           \     /            / \
+        # pl  n           pl  nl           q   nl
+        #    /                              \
+        #   nl                               pl
+        smallRotation(n.parent)
+        smallRotation(n)
+    else:
+        # Left zig-zag
+        #   q               q               n
+        #  /               /             /     \
+        # p               n             p       q
+        #  \             / \             \     /
+        #   n           p   nr            nl  nr
+        #  / \           \
+        # nl  nr          nl
+        # Right zig-zag
+        #   q             q                 n
+        #    \             \             /     \
+        #     p             n           q       p
+        #    /             / \           \     /
+        #   n             nl  p           nl  nr
+        #  / \               /
+        # nl  nr            nr
+        smallRotation(n)
+        smallRotation(n)
+
+
+def find(key, root):
+    """Searches for key in the tree and splay the deepest visited node.
+
+    Returns (result, new_root).
+
+    If found, result is a pointer to the node with the given key.
+
+    Otherwise, result is a pointer to the node with the smallest bigger key.
+
+    If the key is bigger than all keys in the tree, then result is None.
+    """
+    prev_node = cur_node = root
+    next_node = None
+
+    while cur_node:
+        # Note this, nice way to track the next_node
+        if cur_node.key >= key and (next_node is None or cur_node.key < next_node.key):
+            next_node = cur_node
+
+        prev_node = cur_node
+
+        if cur_node.key == key:
+            break
+
+        if cur_node.key < key:
+            cur_node = cur_node.right
+
+        else:
+            cur_node = cur_node.left
+
+    root = splay(prev_node)
+
+    return (next_node, root)
+
+
+def split(key, root):
+    (result, root) = find(key, root)
+
+    if result is None:  # All values in tree are smaller than key
         return (root, None)
+
     right = splay(result)
+
+    # Cut left, note right will include the node with "key" if there is one
     left = right.left
     right.left = None
-    if left is not None:
+    if left:
         left.parent = None
-    update(left)
-    update(right)
+
+    update_sum(left)
+    update_sum(right)
+
     return (left, right)
 
 
 def merge(left, right):
-    if left is None:
-        return right
-    if right is None:
-        return left
-    while right.left is not None:
+    if not (left and right):
+        return left or right
+
+    while right.left:
         right = right.left
-    right = splay(right)
-    right.left = left
-    update(right)
-    return right
+
+    # Move the smallest node on the right to the right's root
+    # Then add left to the right's root
+    root = splay(right)
+    root.left = left
+    left.parent = root
+
+    update_sum(root)
+
+    return root
 
 
-# Code that uses splay tree to solve the problem
+def insert(key, root):
+    (left, right) = split(key, root)
 
-root = None
+    new_node = None
+    if not (right and right.key == key):
+        new_node = Vertex(key, None, None, None, key)
 
-
-def insert(x):
-    global root
-    (left, right) = split(root, x)
-    new_vertex = None
-    if right is None or right.key != x:
-        new_vertex = Vertex(x, x, None, None, None)
-    root = merge(merge(left, new_vertex), right)
+    return merge(merge(left, new_node), right)
 
 
-def erase(x):
-    global root
-    # Implement erase yourself
-    pass
+def delete(key, root):
+    (left, right) = split(key, root)
+
+    if right and right.key == key:
+        # Remove right root
+        right = right.right
+        if right:
+            right.parent = None
+
+    return merge(left, right)
 
 
-def search(x):
-    global root
-    # Implement find yourself
+def range_sum(fr, to, root):
+    # left < fr. middle >= fr
+    (left, middle) = split(fr, root)
+    # middle < to + 1, right >= to + 1
+    (middle, right) = split(to + 1, middle)
 
-    return False
-
-
-def sum(fr, to):
-    global root
-    (left, middle) = split(root, fr)
-    (middle, right) = split(middle, to + 1)
-    ans = 0
-    # Complete the implementation of sum
-
-    return ans
+    return middle.sum if middle else 0, merge(merge(left, middle), right)
 
 
 if __name__ == "__main__":
     MODULO = 1000000001
+    root = None
+
     n = int(stdin.readline())
     last_sum_result = 0
-    for i in range(n):
+
+    for _ in range(n):
         line = stdin.readline().split()
+
         if line[0] == "+":
             x = int(line[1])
-            insert((x + last_sum_result) % MODULO)
+            root = insert((x + last_sum_result) % MODULO, root)
+
         elif line[0] == "-":
             x = int(line[1])
-            erase((x + last_sum_result) % MODULO)
+            root = delete((x + last_sum_result) % MODULO, root)
+
         elif line[0] == "?":
-            x = int(line[1])
-            print("Found" if search((x + last_sum_result) % MODULO) else "Not found")
+            x = (int(line[1]) + last_sum_result) % MODULO
+            result, root = find(x, root)
+            print("Found" if result and result.key == x else "Not found")
+
         elif line[0] == "s":
             l = int(line[1])
             r = int(line[2])
-            res = sum((l + last_sum_result) % MODULO, (r + last_sum_result) % MODULO)
-            print(res)
-            last_sum_result = res % MODULO
+            result, root = range_sum(
+                (l + last_sum_result) % MODULO, (r + last_sum_result) % MODULO, root
+            )
+            print(result)
+            last_sum_result = result % MODULO
