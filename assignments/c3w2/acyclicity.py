@@ -1,7 +1,8 @@
 import sys
-from typing import List
+from typing import List, NewType, Set
 
-AdjacencyList = List[List[int]]
+Vertex = NewType("Vertex", int)
+AdjacencyList = List[List[Vertex]]
 
 
 def acyclic(adj: AdjacencyList):
@@ -18,7 +19,7 @@ def acyclic(adj: AdjacencyList):
 
 
 def detect_cycle_dfs(
-    v: int, adj: AdjacencyList, visited: set, recursion_stack: set
+    v: Vertex, adj: AdjacencyList, visited: Set(Vertex), recursion_stack: Set(Vertex)
 ) -> bool:
     visited.add(v)
 

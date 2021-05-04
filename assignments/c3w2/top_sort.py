@@ -1,11 +1,12 @@
 import sys
 from collections import deque
-from typing import Deque, List
+from typing import Deque, List, NewType
 
-AdjacencyList = List[List[int]]
+Vertex = NewType("Vertex", int)
+AdjacencyList = List[List[Vertex]]
 
 
-def dfs(v: int, adj: AdjacencyList, visited: list, order: Deque):
+def dfs(v: Vertex, adj: AdjacencyList, visited: List[Vertex], order: Deque[Vertex]):
     visited[v] = 1
 
     for next_v in adj[v]:
@@ -15,7 +16,7 @@ def dfs(v: int, adj: AdjacencyList, visited: list, order: Deque):
     order.appendleft(v)
 
 
-def top_sort(adj):
+def top_sort(adj: AdjacencyList) -> Deque[Vertex]:
     visited = [0] * len(adj)
     order = deque()
 
