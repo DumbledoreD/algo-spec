@@ -7,7 +7,7 @@ AdjacencyList = List[List[Vertex]]
 Cost = List[List[int]]
 
 
-def distance(adj: AdjacencyList, cost: AdjacencyList, s: Vertex, t: Vertex):
+def distance(adj: AdjacencyList, cost: AdjacencyList, s: Vertex, t: Vertex) -> int:
     dist = [float("inf")] * len(adj)
     prev = [None] * len(adj)
     dist[s] = 0
