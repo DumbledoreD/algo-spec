@@ -5,7 +5,7 @@ Vertex = NewType("Vertex", int)
 AdjacencyList = List[List[Vertex]]
 
 
-def acyclic(adj: AdjacencyList):
+def acyclic(adj: AdjacencyList) -> bool:
     visited = set()
 
     for v in range(len(adj)):

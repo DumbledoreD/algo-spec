@@ -6,7 +6,7 @@ Vertex = NewType("Vertex", int)
 AdjacencyList = List[List[Vertex]]
 
 
-def bipartite(adj: AdjacencyList):
+def bipartite(adj: AdjacencyList) -> bool:
     colors = [None] * len(adj)
 
     for vertex in range(len(adj)):

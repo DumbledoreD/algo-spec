@@ -6,7 +6,7 @@ Vertex = NewType("Vertex", int)
 AdjacencyList = List[List[Vertex]]
 
 
-def distance(adj: AdjacencyList, s: Vertex, t: Vertex):
+def distance(adj: AdjacencyList, s: Vertex, t: Vertex) -> int:
     dist = [None] * len(adj)
     dist[s] = 0
 
