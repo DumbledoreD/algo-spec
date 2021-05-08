@@ -26,20 +26,20 @@ class Database:
             self.row_counts[dst_parent] = 0
             self.row_counts[src_parent] = new_row_count
 
-        if src_rank == dst_rank:
-            self.rank[src_rank] += 1
+            if src_rank == dst_rank:
+                self.rank[src_rank] += 1
 
     def get_parent(self, table):
-        childs_to_update = []
+        children_to_update = []
 
         root = table
 
-        # Recursive implementaion reaches max recursion depth for one of the testcase
+        # Recursive implementation reaches max recursion depth for one of the testcase
         while root != self.parents[root]:
-            childs_to_update.append(root)
+            children_to_update.append(root)
             root = self.parents[root]
 
-        for i in childs_to_update:
+        for i in children_to_update:
             self.parents[i] = root
 
         return root
@@ -50,7 +50,7 @@ def main():
     counts = list(map(int, input().split()))
     assert len(counts) == n_tables
     db = Database(counts)
-    for i in range(n_queries):
+    for _ in range(n_queries):
         dst, src = map(int, input().split())
         db.merge(dst - 1, src - 1)
         print(db.max_row_count)
