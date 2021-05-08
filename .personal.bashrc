@@ -32,7 +32,7 @@ export PS1='\[\033[01;32m\]$(git config user.name)\[\033[00m\] \[\033[01;34m\]\W
 git config color.status.branch "blue normal bold"
 
 alias gs="git status"
-alias ga="git add -A"
+alias ga="git add -A && pc && gs"
 alias gu="git add -u"
 alias gc="git commit -m"
 alias gp="git push"
