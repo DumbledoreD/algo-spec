@@ -18,7 +18,6 @@ def splay(n):
             bigRotation(n)
         else:
             smallRotation(n)
-
     return n
 
 
@@ -122,9 +121,9 @@ def bigRotation(n):
 
 
 def find(key, root):
-    """Searches for key in the tree and splay the deepest visited node.
+    """Find key in the tree and splay the deepest visited node.
 
-    Returns (result, new_root).
+    Return (result, new_root).
 
     If found, result is a pointer to the node with the given key.
 
@@ -164,7 +163,7 @@ def split(key, root):
 
     right = splay(result)
 
-    # Cut left, note right will include the node with "key" if there is one
+    # Cut left, note right includes the node with "key" if there is one
     left = right.left
     right.left = None
     if left:
