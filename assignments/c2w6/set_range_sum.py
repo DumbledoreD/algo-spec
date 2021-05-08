@@ -36,8 +36,13 @@ def smallRotation(n):
         #  \          /
         #   nr       nr
         nr = n.right
+
         n.right = p
         p.left = nr
+
+        p.parent = n
+        if nr:
+            nr.parent = p
 
     else:  # n is the right child
         # p              n
@@ -46,11 +51,13 @@ def smallRotation(n):
         #  /            \
         # nl             nl
         nl = n.left
+
         n.left = p
         p.right = nl
 
-    # Update p <---> n
-    p.parent = n
+        p.parent = n
+        if nl:
+            nl.parent = p
 
     # Update n <---> q
     n.parent = q
@@ -65,8 +72,10 @@ def smallRotation(n):
 
 
 def update_sum(n):
-    if n:
-        n.sum = n.key + (n.left.sum if n.left else 0) + (n.right.sum if n.right else 0)
+    if not n:
+        return
+
+    n.sum = n.key + (n.left.sum if n.left else 0) + (n.right.sum if n.right else 0)
 
 
 def bigRotation(n):
@@ -208,6 +217,8 @@ def delete(key, root):
 
 
 def range_sum(fr, to, root):
+    fr, to = min(fr, to), max(fr, to)
+
     # left < fr. middle >= fr
     (left, middle) = split(fr, root)
     # middle < to + 1, right >= to + 1
@@ -217,14 +228,18 @@ def range_sum(fr, to, root):
 
 
 if __name__ == "__main__":
+    n, *lines = stdin.read().split("\n")
+
     MODULO = 1000000001
     root = None
 
-    n = int(stdin.readline())
     last_sum_result = 0
 
-    for _ in range(n):
-        line = stdin.readline().split()
+    for line in lines:
+        if not line:
+            continue
+
+        line = line.split()
 
         if line[0] == "+":
             x = int(line[1])
