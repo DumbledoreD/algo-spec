@@ -1,5 +1,5 @@
 import sys
-from typing import Dict
+from typing import Dict, List
 
 
 class TrieNode:
@@ -42,13 +42,43 @@ class Trie:
 
             cur_layer = next_layer
 
+    def get_match_indices(self, text: str) -> List[int]:
+        result = []
+
+        for i in range(len(text)):
+            if self.has_match(i, text):
+                result.append(i)
+
+        return result
+
+    def has_match(self, starting_index: int, text: str) -> bool:
+        cur_node = self.root
+
+        for i in range(starting_index, len(text)):
+            cur_letter = text[i]
+
+            if cur_letter not in cur_node.children:
+                return False
+
+            cur_node = cur_node.children[cur_letter]
+
+            if not cur_node.children:  # Reached a leaf
+                return True
+
+        # Reached end of text
+        return False
+
 
 if __name__ == "__main__":
-    patterns = sys.stdin.read().split()[1:]
+    text = sys.stdin.readline().strip()
+    n = int(sys.stdin.readline().strip())
 
     trie = Trie()
 
-    for pattern in patterns:
+    for i in range(n):
+        pattern = sys.stdin.readline().strip()
         trie.add_pattern(pattern)
 
-    trie.bfs()
+    ans = trie.get_match_indices(text)
+
+    sys.stdout.write(" ".join(map(str, ans)) + "\n")
