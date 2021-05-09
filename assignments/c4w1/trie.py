@@ -29,18 +29,19 @@ class Trie:
                 cur_node.children[letter] = new_node
                 cur_node = new_node
 
-    def bfs(self):
-        cur_layer = [self.root]
 
-        while cur_layer:
-            next_layer = []
+def bfs(root: TrieNode):
+    cur_layer = [root]
 
-            for parent in cur_layer:
-                for letter, child in parent.children.items():
-                    print(f"{parent.key}->{child.key}:{letter}")
-                    next_layer.append(child)
+    while cur_layer:
+        next_layer = []
 
-            cur_layer = next_layer
+        for parent in cur_layer:
+            for letter, child in parent.children.items():
+                print(f"{parent.key}->{child.key}:{letter}")
+                next_layer.append(child)
+
+        cur_layer = next_layer
 
 
 if __name__ == "__main__":
@@ -51,4 +52,4 @@ if __name__ == "__main__":
     for pattern in patterns:
         trie.add_pattern(pattern)
 
-    trie.bfs()
+    bfs(trie.root)

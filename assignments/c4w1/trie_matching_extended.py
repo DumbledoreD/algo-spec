@@ -3,8 +3,8 @@ from typing import Dict, List
 
 
 class TrieNode:
-    def __init__(self, key: int, val: str):
-        self.key, self.val = key, val
+    def __init__(self, key: int, val: str, is_end: bool = False):
+        self.key, self.val, self.is_end = key, val, is_end
         self.children: Dict[str, TrieNode] = {}
 
 
@@ -18,6 +18,9 @@ class Trie:
         return self._key_count
 
     def add_pattern(self, pattern: str):
+        if not pattern:
+            return
+
         cur_node = self.root
 
         for letter in pattern:
@@ -28,6 +31,8 @@ class Trie:
                 new_node = TrieNode(self._gen_key(), letter)
                 cur_node.children[letter] = new_node
                 cur_node = new_node
+
+        cur_node.is_end = True
 
     def get_match_indices(self, text: str) -> List[int]:
         result = []
@@ -49,7 +54,8 @@ class Trie:
 
             cur_node = cur_node.children[cur_letter]
 
-            if not cur_node.children:  # Reached a leaf
+            # Found a matching pattern
+            if cur_node.is_end:
                 return True
 
         # Reached end of text
