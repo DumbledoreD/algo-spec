@@ -1,7 +1,7 @@
 # Ref: https://www.youtube.com/watch?v=VA9m_l6LpwI
 
 import sys
-from typing import List
+from typing import List, Union
 
 
 class SuffixTreeNode:
@@ -18,9 +18,54 @@ class SuffixTree:
 
     def build_suffix_tree(self):
         for i in range(len(self.text) - 1, -1, -1):
-            self.add_suffix(i, self.root)
+            self.add_suffix_itr(i, self.root)
 
-    def add_suffix(self, start_index: int, start_node: SuffixTreeNode):
+    def add_suffix_itr(self, start_index: int, start_node: SuffixTreeNode):
+        suffix_length = len(self.text) - start_index
+
+        cur_node: Union[SuffixTreeNode, None] = start_node
+
+        while cur_node:
+            for node in cur_node.children:
+                if self.text[node.start_index] == self.text[start_index]:
+                    cur_node = node
+                    break
+            # No existing node start with current suffix. Add whole suffix as a new node
+            else:
+                new_node = SuffixTreeNode(start_index, suffix_length)
+                cur_node.children.append(new_node)
+                cur_node = None
+
+            if cur_node:
+                for i in range(1, min(suffix_length, cur_node.length)):
+                    # Note the last letter for the incoming suffix is "$"
+                    if (
+                        self.text[start_index + i]
+                        != self.text[cur_node.start_index + i]
+                    ):
+                        # Branch, edit cur_node
+                        branched_cur_node = SuffixTreeNode(
+                            cur_node.start_index + i, cur_node.length - i
+                        )
+                        branched_cur_node.children = cur_node.children
+
+                        cur_node.length = i
+                        cur_node.children = [branched_cur_node]
+
+                        # Branch, add remaining new suffix as new node
+                        start_index += i
+
+                        break
+
+                # All letter match in the range
+                else:
+                    # Add remaining new suffix as new node
+                    if cur_node.length < suffix_length:
+                        start_index += cur_node.length
+                    else:
+                        cur_node = None  # Exit loop
+
+    def add_suffix_rec(self, start_index: int, start_node: SuffixTreeNode):
         suffix_length = len(self.text) - start_index
 
         cur_node = None
@@ -44,7 +89,7 @@ class SuffixTree:
                     cur_node.children = [branched_cur_node]
 
                     # Branch, add remaining new suffix as new node
-                    self.add_suffix(start_index + i, cur_node)
+                    self.add_suffix_rec(start_index + i, cur_node)
 
                     break
 
@@ -55,7 +100,7 @@ class SuffixTree:
                     cur_node.length < suffix_length
                     and self.text[cur_node.start_index + cur_node.length - 1] != "$"
                 ):
-                    self.add_suffix(start_index + cur_node.length, cur_node)
+                    self.add_suffix_rec(start_index + cur_node.length, cur_node)
 
         # No existing node start with current suffix. Add whole suffix as a new node
         else:
