@@ -1,4 +1,5 @@
 import sys
+from collections import Counter
 
 ALPHABET = "$ACGT"
 ALPHABET_TO_INDEX = {char: i for i, char in enumerate(ALPHABET)}
@@ -6,12 +7,8 @@ ALPHABET_TO_INDEX = {char: i for i, char in enumerate(ALPHABET)}
 
 def find_matches(text, patterns):
     suffix_array = build_suffix_array(text)
-    matches = set()
-
-    for pattern in patterns:
-        matches.update(find_matches_with_sa(text, pattern, suffix_array))
-
-    return matches
+    bwt = "".join([text[(index - 1) % len(text)] for index in suffix_array])
+    return get_bw_matching_with_sa(bwt, patterns, suffix_array)
 
 
 def build_suffix_array(text):
@@ -137,6 +134,7 @@ def find_matches_with_sa(text, pattern, suffix_array):
     while min_rank < max_rank:
         mid_rank = (min_rank + max_rank) // 2
 
+        # Slow
         if (
             pattern
             > text[suffix_array[mid_rank] : suffix_array[mid_rank] + len(pattern)]
@@ -152,6 +150,7 @@ def find_matches_with_sa(text, pattern, suffix_array):
     while min_rank < max_rank:
         mid_rank = (min_rank + max_rank) // 2
 
+        # Slow
         if (
             pattern
             < text[suffix_array[mid_rank] : suffix_array[mid_rank] + len(pattern)]
@@ -173,8 +172,78 @@ def find_matches_with_sa(text, pattern, suffix_array):
     return results
 
 
+def get_bw_matching_with_sa(bwt, patterns, suffix_array):
+    # preprocess of bwt
+    first_counter = Counter(bwt)
+    last_tally = get_tally(bwt)
+
+    matches = set()
+
+    for pattern in patterns:
+        match_count = 0
+        cur_char = pattern[-1]
+
+        if cur_char not in first_counter:
+            continue
+
+        min_rank = 0
+        match_count = first_counter[cur_char]
+        max_rank = min_rank + match_count - 1
+
+        for i in range(len(pattern) - 2, -1, -1):
+            start_row = get_row_num(cur_char, min_rank, first_counter)
+            end_row = get_row_num(cur_char, max_rank, first_counter)
+
+            cur_char = pattern[i]
+            min_rank = last_tally[cur_char][start_row - 1]
+            match_count = last_tally[cur_char][end_row] - min_rank
+            max_rank = min_rank + match_count - 1
+
+            # No matches for cur_char
+            if not match_count:
+                break
+
+        else:
+            # Found matches
+            start_row = get_row_num(cur_char, min_rank, first_counter)
+            end_row = get_row_num(cur_char, max_rank, first_counter)
+
+            for row in range(start_row, end_row + 1):
+                matches.add(suffix_array[row])
+
+    return matches
+
+
+def get_tally(bwt):
+    tally = {char: [1 if bwt[0] == char else 0] for char in ALPHABET}
+
+    for i in range(1, len(bwt)):
+        for char in ALPHABET:
+            if bwt[i] == char:
+                tally[char].append(tally[char][-1] + 1)
+            else:
+                tally[char].append(tally[char][-1])
+
+    return tally
+
+
+def get_row_num(char, rank, first_counter):
+    if char == "$":
+        return 0
+
+    row_num = rank
+
+    for item, count in first_counter.items():
+        # Note, this will evaluate to True at least once for "$"
+        # As ord("$") is smaller than ord(char) for char in alphabet
+        if ord(item) < ord(char):
+            row_num += count
+
+    return row_num
+
+
 if __name__ == "__main__":
-    text = sys.stdin.readline().strip()
+    text = sys.stdin.readline().strip() + "$"
     pattern_count = int(sys.stdin.readline().strip())
     patterns = sys.stdin.readline().strip().split()
     matches = find_matches(text, patterns)

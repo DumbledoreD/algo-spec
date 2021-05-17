@@ -21,5 +21,5 @@ def slow(text):
         for trial in range(10000)
     ],
 )
-def test_basic(text):
+def test_stress(text):
     assert fast(text) == slow(text)
