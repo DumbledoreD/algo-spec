@@ -16,7 +16,7 @@ def naive_gaussian_elimination(augmented_matrix):
                 )
                 break
 
-        # Scale  cur_row
+        # Scale cur_row
         factor = augmented_matrix[cur_row][cur_col]
         for col in range(cur_col, n + 1):
             augmented_matrix[cur_row][col] /= factor
@@ -42,7 +42,7 @@ def naive_gaussian_elimination(augmented_matrix):
 
 
 if __name__ == "__main__":
-    data = list(sys.stdin.read().split("\n"))
+    data = sys.stdin.read().split("\n")
 
     augmented_matrix = [list(map(int, row.split())) for row in data[1:] if row]
     solution = naive_gaussian_elimination(augmented_matrix)
