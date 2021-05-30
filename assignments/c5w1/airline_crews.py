@@ -94,7 +94,7 @@ def get_matches_from_adj_matrix(adj_matrix, u_count, v_count):
 
 
 if __name__ == "__main__":
-    data = list(sys.stdin.read().split("\n"))
+    data = sys.stdin.read().split("\n")
 
     flight_count, crew_count = map(int, data[0].split())
 

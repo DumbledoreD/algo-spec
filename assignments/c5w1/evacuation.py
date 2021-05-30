@@ -69,7 +69,7 @@ def bfs(adj_matrix, source, sink, child_to_parent):
 
 
 if __name__ == "__main__":
-    data = list(sys.stdin.read().split("\n"))
+    data = sys.stdin.read().split("\n")
 
     node_count, edge_count = map(int, data[0].split())
 
