@@ -6,19 +6,29 @@ class GraphColorSolver:
         self.colors = colors
 
     def get_cnfs(self, n, edges):
-        cnfs = []
-        cnfs.extend(self.get_cnf_for_vertex(n))
-        cnfs.extend(self.get_cnf_for_edges(edges))
-        return n * self.colors, cnfs
+        self._reset()
+        self._get_var_count(n)
+        self._add_cnf_for_vertex(n)
+        self._add_cnf_for_edges(edges)
+        return self._var_count, self._cnfs
 
-    def get_cnf_for_vertex(self, n):
-        # Each vertex has to be colored by some color, (Vertices use 1-based index)
+    def _reset(self):
+        self._var_count = 0
+        self._cnfs = []
+
+    def _get_var_count(self, n):
+        # A separate variable x_i_j for each vertex i of the initial graph and each
+        # possible color j
+        self._var_count = n * self.colors
+
+    def _add_cnf_for_vertex(self, n):
+        # Each vertex has to be colored by some color, (vertices use 1-based index)
         for i in range(1, n + 1):
             var_index = (i - 1) * self.colors + 1
             # (x_i_1 v x_i_2 v ... x_i_j)
-            yield " ".join([str(var_index + j) for j in range(self.colors)])
+            self._cnfs.append(" ".join(str(var_index + j) for j in range(self.colors)))
 
-    def get_cnf_for_edges(self, edges):
+    def _add_cnf_for_edges(self, edges):
         # Vertices connected by an edge must have different colors
         for u, v in edges:
             u_index = (u - 1) * self.colors + 1
@@ -26,7 +36,7 @@ class GraphColorSolver:
 
             for j in range(self.colors):
                 # Not both, (-x_u_j v -x_v_j)
-                yield " ".join([str(-(u_index + j)), str(-(v_index + j))])
+                self._cnfs.append(" ".join([str(-(u_index + j)), str(-(v_index + j))]))
 
 
 if __name__ == "__main__":
