@@ -1,4 +1,4 @@
-# Independent Set Problem
+# Independent set problem
 
 import sys
 import threading
