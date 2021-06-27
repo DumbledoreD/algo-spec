@@ -6,30 +6,6 @@ from collections import defaultdict
 from itertools import combinations
 
 
-def build_graph(data):
-    nm, *edges = data
-    n, _ = map(int, nm.split())
-
-    # Initialize with inf, makes detecting no path easier, also takes care of no edge.
-    graph = [[float("inf")] * n for _ in range(n)]
-
-    for edge in edges:
-        if edge:
-            u, v, weight = map(int, edge.split())
-            u -= 1
-            v -= 1
-            graph[u][v] = graph[v][u] = weight
-
-    return graph
-
-
-def print_answer(weight, path):
-    print(-1 if weight == float("inf") else weight)
-
-    if path:
-        print(" ".join(map(str, (i + 1 for i in path))))
-
-
 class TravellingSalesmanSolver:
     def __init__(self, graph):
         self.graph = graph
@@ -105,6 +81,30 @@ class TravellingSalesmanSolver:
     def get_set_without_i(self, s, i):
         # Flip i-th bit
         return s ^ (1 << i)
+
+
+def build_graph(data):
+    nm, *edges = data
+    n, _ = map(int, nm.split())
+
+    # Initialize with inf, makes detecting no path easier, also takes care of no edge.
+    graph = [[float("inf")] * n for _ in range(n)]
+
+    for edge in edges:
+        if edge:
+            u, v, weight = map(int, edge.split())
+            u -= 1
+            v -= 1
+            graph[u][v] = graph[v][u] = weight
+
+    return graph
+
+
+def print_answer(weight, path):
+    print(-1 if weight == float("inf") else weight)
+
+    if path:
+        print(" ".join(map(str, (i + 1 for i in path))))
 
 
 if __name__ == "__main__":
