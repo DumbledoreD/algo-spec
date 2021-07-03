@@ -1,5 +1,7 @@
 # Count Sketch / Heavy Hitter / Approx Point Query
 
+# TODO: exceeded memory limit.
+
 import math
 import statistics
 import sys
@@ -7,8 +9,8 @@ import sys
 
 class ApproxPointQuery:
     # Not sure about what these values should be.
-    _bucket_multiplier = 50
-    _estimate_count = 10
+    _bucket_multiplier = 1000
+    _estimate_count = 100
 
     _hash_multiplier = 42
     _hash_prime = 1000000007
@@ -18,32 +20,24 @@ class ApproxPointQuery:
         self._bucket_count = logn * self._bucket_multiplier
 
         self._counter = [[0] * self._bucket_count for _ in range(self._estimate_count)]
-        self._hash_fcn = [self._get_hash_fcn(r) for r in range(self._estimate_count)]
-        self._sign_fcn = [self._get_sign_fcn(r) for r in range(self._estimate_count)]
 
-    def _get_hash_fcn(self, r):
-        def hash_fcn(v_id):
-            h = (self._hash_multiplier * v_id + r) % self._hash_prime
-            return h % self._bucket_count
+    def _hash_fcn(self, r, v_id):
+        h = (self._hash_multiplier * v_id + r) % self._hash_prime
+        return h % self._bucket_count
 
-        return hash_fcn
-
-    def _get_sign_fcn(self, r):
-        def sign_fcn(v_id):
-            h = (self._hash_multiplier * v_id + r) % self._hash_prime
-            return 1 if h % 2 else -1
-
-        return sign_fcn
+    def _sign_fcn(self, r, v_id):
+        h = (self._hash_multiplier * v_id + r) % self._hash_prime
+        return 1 if h % 2 else -1
 
     def update(self, v_id, count):
         for r in range(self._estimate_count):
-            c = self._hash_fcn[r](v_id)
-            s = self._sign_fcn[r](v_id)
+            c = self._hash_fcn(r, v_id)
+            s = self._sign_fcn(r, v_id)
             self._counter[r][c] += count * s
 
     def get_estimate(self, v_id):
         return statistics.median(
-            self._counter[r][self._hash_fcn[r](v_id)] * self._sign_fcn[r](v_id)
+            self._counter[r][self._hash_fcn(r, v_id)] * self._sign_fcn(r, v_id)
             for r in range(self._estimate_count)
         )
 
