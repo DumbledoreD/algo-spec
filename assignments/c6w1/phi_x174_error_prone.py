@@ -1,48 +1,76 @@
 import sys
+from collections import Counter, defaultdict, namedtuple
 
 
 class SequenceAssembler:
+    MAX_MISMATCHES = 2
+    MIN_CONSENSUS_VOTE = 5
+
     def __init__(self, reads):
         self._reads = self._preprocess_reads(reads)
 
         self._prefix_tree = PrefixTree(self._reads)
 
-        self._assemble()
+        self._build_consensus_counter()
+        self._assemble_from_consensus_counter()
 
     def _preprocess_reads(self, reads):
         # Filter out duplicates, note reads are already sorted
         return [r for i, r in enumerate(reads) if r != reads[i - 1] and r]
 
-    def _assemble(self):
+    def _build_consensus_counter(self):
         self._seen = [False] * len(self._reads)
+        self._consensus_counter = defaultdict(Counter)
 
-        cur_read = self._reads[0]
+        read = self._reads[0]
         self._seen[0] = True
-        result = [cur_read]
 
-        while cur_read:
-            next_read_enum, concat_pos = self._find_max_overlap(cur_read)
-            next_read = None if next_read_enum is None else self._reads[next_read_enum]
+        for i, c in enumerate(read):
+            self._consensus_counter[i].update(c)
 
-            if next_read is not None:
-                result.append(next_read[concat_pos:])
-                self._seen[next_read_enum] = True
+        while True:
+            read_enum, concat_pos = self._find_max_overlap(read)
 
-            cur_read = next_read
+            if read_enum is None:
+                break
 
-        result = "".join(result)
-        self._result = self._remove_border(result)
+            read = self._reads[read_enum]
+            self._seen[read_enum] = True
+
+            offset = len(self._consensus_counter) - concat_pos
+            for i, c in enumerate(read):
+                pos = i + offset
+                self._consensus_counter[pos].update(c)
 
     def _find_max_overlap(self, read):
         for i in range(1, len(read)):
-            read_lb, read_ub, concat_pos = self._prefix_tree.find_match(read[i:])
-
-            if read_lb is not None:
+            for read_lb, read_ub, concat_pos in self._prefix_tree.find_match(
+                read[i:], self.MAX_MISMATCHES
+            ):
                 for j in range(read_lb, read_ub + 1):
                     if not self._seen[j]:
                         return j, concat_pos
-
         return None, None
+
+    def _assemble_from_consensus_counter(self):
+        result = []
+
+        for i in range(len(self._consensus_counter)):
+            counter = self._consensus_counter[i]
+            char, count = counter.most_common(1)[0]
+
+            # Ignore start and end positions if min required votes not met
+            if count < self.MIN_CONSENSUS_VOTE:
+                if result:
+                    break
+                else:
+                    continue
+
+            result.append(char)
+
+        result = "".join(result)
+
+        self._result = self._remove_border(result)
 
     def _remove_border(self, text):
         prefix_function = compute_prefix_function(text)
@@ -123,41 +151,56 @@ class PrefixTree:
 
                     return
 
-    def find_match(self, read):
-        cur_node = self.root
-        path_length = 0
-        local_pos = 0
+    def find_match(self, read, max_mismatches):
+        OnStackNode = namedtuple("OnStackNode", ["node", "path_length", "mismatches"])
 
-        # TODO: Similar to _add_read_to_tree, DRY.
-        while path_length + local_pos < len(read):
-            read_pos = path_length + local_pos
-            cur_char = read[read_pos]
+        node_stack = [OnStackNode(self.root, 0, 0)]
 
-            # In node comparison
-            if cur_node.chain_length and local_pos < cur_node.chain_length:
-                ref_char = self._reads[cur_node.lb][read_pos]
+        while node_stack:
+            cur_node, path_length, mismatches = node_stack.pop()
+            local_pos = 0
 
-                # Match
-                if cur_char == ref_char:
+            while path_length + local_pos < len(read):
+                read_pos = path_length + local_pos
+                cur_char = read[read_pos]
+
+                # In node comparison
+                if cur_node.chain_length and local_pos < cur_node.chain_length:
+                    ref_char = self._reads[cur_node.lb][read_pos]
+
+                    # Mismatch
+                    if cur_char != ref_char:
+                        mismatches += 1
+
+                        if mismatches > max_mismatches:
+                            break
+
                     local_pos += 1
 
-                # Mismatch
+                # Advance to the next node
                 else:
-                    return None, None, None
-
-            # Advance to the next node
-            else:
-                # Match
-                if cur_char in cur_node.children:
-                    local_pos = 0
                     path_length += cur_node.chain_length + 1
-                    cur_node = cur_node.children[cur_char]
 
-                # Mismatch
-                else:
-                    return None, None, None
+                    # Match
+                    if cur_char in cur_node.children:
+                        local_pos = 0
+                        cur_node = cur_node.children[cur_char]
 
-        return cur_node.lb, cur_node.ub, path_length + local_pos
+                    # Mismatch
+                    else:
+                        mismatches += 1
+
+                        if mismatches <= max_mismatches:
+                            for node in cur_node.children.values():
+                                node_stack.append(
+                                    OnStackNode(node, path_length, mismatches)
+                                )
+
+                        break
+
+            # Yield when while condition is false, don't yield on break
+            else:
+                yield cur_node.lb, cur_node.ub, path_length + local_pos
 
 
 class Node:
