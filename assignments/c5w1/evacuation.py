@@ -32,7 +32,7 @@ def ford_fulkerson(adj_matrix, source, sink):
 
         flow += path_flow
 
-        # Upadate network and residual network along the path, start from the sink
+        # Update network and residual network along the path, start from the sink
         v = sink
         while v != source:
             u = child_to_parent[v]
